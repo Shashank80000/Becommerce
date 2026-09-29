@@ -21,7 +21,7 @@ MongoDB must be running at `MONGO_URI` before seeding or starting the server. Th
 
 - `PORT`: API port, default `5000` (hosting platforms normally provide this automatically)
 - `MONGO_URI`: MongoDB connection string. Use the MongoDB Atlas `mongodb+srv://` URI in production.
-- `CLIENT_URL`: comma-separated allowed frontend origins. This is required when `NODE_ENV=production`, for example `https://www.example.com,https://example.com`.
+- `CLIENT_URL`: comma-separated allowed frontend origins. This is required when `NODE_ENV=production`, for example `https://www.example.com,https://example.com`. Use origins only: do not include `/api` or a trailing slash.
 - `ADMIN_API_KEY`: temporary admin key sent as `x-admin-key`
 - `NODE_ENV`: `development` or `production`
 
@@ -96,3 +96,7 @@ This repository is a monorepo. Deploy the `Backend` directory as the web service
 For an existing Render service that was created without the Blueprint, update its settings to **Root Directory** `Backend`, **Build Command** `npm ci`, and **Start Command** `npm start`, then redeploy. Do not use `npm run dev` in Render: it invokes `nodemon`, which is intentionally a development-only dependency.
 
 In MongoDB Atlas, create a database user and allow the deployed backend's outbound IP address in **Network Access**. Rotate any password that has been shared or committed. The API health check is available at `/health`.
+
+For a Vercel frontend deployed separately from this API, set `VITE_API_URL=https://YOUR-RENDER-SERVICE.onrender.com/api` in Vercel and redeploy the frontend. In Render, set `CLIENT_URL` to the exact Vercel frontend origin, for example `https://YOUR-PROJECT.vercel.app`.
+
+If Render logs `querySrv ECONNREFUSED _mongodb._tcp...`, the MongoDB Atlas SRV DNS lookup failed before Express could start. Verify that `MONGO_URI` is the full current Node.js driver URI copied from Atlas, that the Atlas cluster is running, and that the Render service can use DNS and connect to Atlas. The backend logs now include the error name and code to distinguish DNS, authentication, and connection failures.

@@ -11,11 +11,12 @@ import adminRoutes from "./routes/adminRoutes.js";
 import { apiRateLimit } from "./middleware/rateLimitMiddleware.js";
 import { notFound } from "./middleware/notFoundMiddleware.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
+import { getDatabaseStatus } from "./config/db.js";
 
 const app = express();
 const configuredOrigins = (process.env.CLIENT_URL || "")
   .split(",")
-  .map((origin) => origin.trim())
+  .map((origin) => origin.trim().replace(/\/+$/, ""))
   .filter(Boolean);
 if (process.env.NODE_ENV === "production" && configuredOrigins.length === 0) {
   throw new Error("CLIENT_URL must be configured in production");
@@ -43,18 +44,32 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use("/api", apiRateLimit);
-app.get("/health", (req, res) =>
-  res.json({
+app.get("/health", (req, res) => {
+  const database = getDatabaseStatus();
+
+  return res.status(database.connected ? 200 : 503).json({
     success: true,
-    data: { status: "ok", service: "becommerce-api" },
-  }),
-);
+    data: {
+      status: database.connected ? "ok" : "degraded",
+      service: "becommerce-api",
+      database,
+    },
+  });
+});
+
+app.get("/test", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Backend is working",
+  });
+});
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/solutions", solutionRoutes);
 app.use("/api/quotes", quoteRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/admin", adminRoutes);
+
 app.use(notFound);
 app.use(errorHandler);
 export default app;

@@ -25,6 +25,16 @@ If the frontend and API use the same public domain through a reverse proxy, no f
 VITE_API_URL=https://api.example.com/api
 ```
 
+### Vercel frontend with a Render API
+
+In **Vercel → Project Settings → Environment Variables**, add the following for the Production environment (and Preview if applicable), then redeploy the frontend:
+
+```env
+VITE_API_URL=https://YOUR-RENDER-SERVICE.onrender.com/api
+```
+
+Use the exact public URL of the Render web service. Do not use `/api` by itself when Vercel and Render are separate deployments, and do not add a trailing slash.
+
 `VITE_*` values are public and embedded into the browser bundle. Never place MongoDB URIs, admin keys, or other secrets in a frontend environment variable.
 
 Because the application uses `BrowserRouter`, configure the static host to rewrite unknown non-file routes (for example `/products/...` and `/admin/...`) to `index.html`. Keep `/api/*` routed to the backend when both applications share a domain.
