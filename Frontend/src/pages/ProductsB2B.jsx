@@ -41,8 +41,8 @@ export default function ProductsB2B() {
         : sort === "Name Z-A"
           ? b.name.localeCompare(a.name)
           : sort === "Newest"
-            ? b.createdAt.localeCompare(a.createdAt)
-            : b.popularity.localeCompare(a.popularity),
+            ? String(b.createdAt || "").localeCompare(String(a.createdAt || ""))
+            : String(b.popularity || "").localeCompare(String(a.popularity || "")),
     );
   }, [products, query, filters, sort]);
   return (
