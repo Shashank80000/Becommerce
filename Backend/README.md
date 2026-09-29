@@ -19,9 +19,9 @@ MongoDB must be running at `MONGO_URI` before seeding or starting the server. Th
 
 ## Environment
 
-- `PORT`: API port, default `5000`
-- `MONGO_URI`: MongoDB connection string
-- `CLIENT_URL`: allowed frontend origin
+- `PORT`: API port, default `5000` (hosting platforms normally provide this automatically)
+- `MONGO_URI`: MongoDB connection string. Use the MongoDB Atlas `mongodb+srv://` URI in production.
+- `CLIENT_URL`: comma-separated allowed frontend origins. This is required when `NODE_ENV=production`, for example `https://www.example.com,https://example.com`.
 - `ADMIN_API_KEY`: temporary admin key sent as `x-admin-key`
 - `NODE_ENV`: `development` or `production`
 
@@ -71,3 +71,18 @@ Send `x-admin-key: change_this_secret` (or the value configured in `.env`).
 - `GET /api/admin/contacts`
 
 All responses use `{ success, data, message }`; validation errors additionally include `errors`. Product/category/solution deletes are soft deletes.
+
+## Deployment
+
+Set the following environment variables in the backend hosting provider; do not commit them to Git:
+
+```env
+NODE_ENV=production
+MONGO_URI=mongodb+srv://USERNAME:PASSWORD@CLUSTER.mongodb.net/cleaning_products?retryWrites=true&w=majority
+CLIENT_URL=https://www.example.com,https://example.com
+ADMIN_API_KEY=a-long-random-secret
+```
+
+Start command: `npm start`.
+
+In MongoDB Atlas, create a database user and allow the deployed backend's outbound IP address in **Network Access**. Rotate any password that has been shared or committed. The API health check is available at `/health`.

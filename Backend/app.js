@@ -13,10 +13,13 @@ import { notFound } from "./middleware/notFoundMiddleware.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
-const configuredOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+const configuredOrigins = (process.env.CLIENT_URL || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+if (process.env.NODE_ENV === "production" && configuredOrigins.length === 0) {
+  throw new Error("CLIENT_URL must be configured in production");
+}
 const allowedOrigins = process.env.NODE_ENV === "production"
   ? configuredOrigins
   : [
@@ -26,6 +29,7 @@ const allowedOrigins = process.env.NODE_ENV === "production"
       "http://127.0.0.1:5173",
       "http://127.0.0.1:5174",
     ];
+if (process.env.NODE_ENV === "production") app.set("trust proxy", 1);
 app.use(helmet());
 app.use(
   cors({
