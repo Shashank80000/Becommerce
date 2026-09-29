@@ -1,10 +1,12 @@
 const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
 
-// Use a relative URL by default so production can serve the frontend and API
-// behind the same domain. Set VITE_API_URL for a separately hosted API.
+const defaultApiUrl = import.meta.env.PROD
+  ? "https://becommerce-q6hw.onrender.com/api"
+  : "/api";
+
 export const API_URL = configuredApiUrl
   ? configuredApiUrl.replace(/\/+$/, "")
-  : "/api";
+  : defaultApiUrl;
 
 export async function request(path, options = {}) {
   const response = await fetch(`${API_URL}${path}`, {
