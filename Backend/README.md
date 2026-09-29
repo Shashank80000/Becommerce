@@ -85,4 +85,14 @@ ADMIN_API_KEY=a-long-random-secret
 
 Start command: `npm start`.
 
+### Render
+
+This repository is a monorepo. Deploy the `Backend` directory as the web service, not the repository root. A root-level `render.yaml` is included for Blueprint deployments and configures:
+
+- Build command: `npm ci`
+- Start command: `npm start`
+- Health check path: `/health`
+
+For an existing Render service that was created without the Blueprint, update its settings to **Root Directory** `Backend`, **Build Command** `npm ci`, and **Start Command** `npm start`, then redeploy. Do not use `npm run dev` in Render: it invokes `nodemon`, which is intentionally a development-only dependency.
+
 In MongoDB Atlas, create a database user and allow the deployed backend's outbound IP address in **Network Access**. Rotate any password that has been shared or committed. The API health check is available at `/health`.
