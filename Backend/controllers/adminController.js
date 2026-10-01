@@ -15,17 +15,34 @@ export function loginAdmin(req, res) {
 
 export async function dashboard(req, res, next) {
   try {
-    const [products, quotes, categories, solutions, pendingQuotes] =
-      await Promise.all([
-        Product.countDocuments({ isActive: true }),
-        Quote.countDocuments(),
-        Category.countDocuments({ isActive: true }),
-        Solution.countDocuments({ isActive: true }),
-        Quote.countDocuments({ status: "NEW" }),
-      ]);
+    const [
+      products,
+      quotes,
+      categories,
+      solutions,
+      pendingQuotes,
+      quotesWithPdf,
+      recentQuotes,
+    ] = await Promise.all([
+      Product.countDocuments({ isActive: true }),
+      Quote.countDocuments(),
+      Category.countDocuments({ isActive: true }),
+      Solution.countDocuments({ isActive: true }),
+      Quote.countDocuments({ status: "NEW" }),
+      Quote.countDocuments({ attachment: { $exists: true } }),
+      Quote.find().sort({ createdAt: -1 }).limit(5).lean(),
+    ]);
     res.json({
       success: true,
-      data: { products, quotes, categories, solutions, pendingQuotes },
+      data: {
+        products,
+        quotes,
+        categories,
+        solutions,
+        pendingQuotes,
+        quotesWithPdf,
+        recentQuotes,
+      },
     });
   } catch (error) {
     next(error);

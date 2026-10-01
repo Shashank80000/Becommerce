@@ -12,6 +12,7 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 import { solutions } from "../utils/mockData";
+import { industryColor, tint } from "../utils/colors";
 const icons = [
   Factory,
   Building2,
@@ -34,8 +35,8 @@ export default function SolutionsB2B() {
           <em>by industry.</em>
         </h1>
         <p>
-          Every environment has different standards, surfaces, and routines.
-          Find a supply approach built for yours.
+          A hospital and a hotel don’t clean the same way. Pick your kind of
+          place and we’ll show you what usually works there.
         </p>
       </div>
       <div className="solution-grid">
@@ -46,6 +47,7 @@ export default function SolutionsB2B() {
               className="solution-card"
               to={`/solutions/${solution.slug}`}
               key={solution.slug}
+              style={tint(industryColor(solution.name))}
             >
               <Icon size={25} />
               <span className="solution-index">0{index + 1}</span>

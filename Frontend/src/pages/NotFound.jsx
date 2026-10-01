@@ -4,18 +4,19 @@ export default function NotFound() {
     <section className="page centered-page">
       <p className="eyebrow">404</p>
       <h1>
-        Page not
+        Hmm, this page
         <br />
-        <em>found.</em>
+        <em>has gone missing.</em>
       </h1>
       <p className="lead">
-        The page you requested does not exist or has moved.
+        It may have moved, or the link has a typo. Sorry about that.
+        Try the products, or tell us what you were looking for.
       </p>
-      <Link className="button button-dark" to="/">
-        Go Home ↗
+      <Link className="button button-dark" to="/products">
+        Browse products ↗
       </Link>{" "}
-      <Link className="text-button" to="/products">
-        View Products
+      <Link className="text-button" to="/contact">
+        Ask us instead
       </Link>
     </section>
   );

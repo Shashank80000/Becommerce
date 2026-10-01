@@ -35,7 +35,14 @@ export default function AdminProducts() {
               {products.map((product) => (
                 <tr key={product.id}>
                   <td className="table-product">
-                    <img src={product.image} alt="" />
+                    <img
+                      src={product.image}
+                      alt=""
+                      width="40"
+                      height="32"
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span>{product.name}</span>
                   </td>
                   <td>{product.category}</td>

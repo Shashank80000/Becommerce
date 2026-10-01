@@ -22,6 +22,7 @@ import {
 import {
   adminListQuotes,
   updateQuoteStatus,
+  downloadQuoteAttachment,
 } from "../controllers/quoteController.js";
 import { adminListContacts } from "../controllers/contactController.js";
 
@@ -37,5 +38,6 @@ router.route("/solutions").get(adminListSolutions).post(createSolution);
 router.route("/solutions/:id").put(updateSolution).delete(deactivateSolution);
 router.get("/quotes", adminListQuotes);
 router.patch("/quotes/:id/status", updateQuoteStatus);
+router.get("/quotes/:id/attachment", downloadQuoteAttachment);
 router.get("/contacts", adminListContacts);
 export default router;

@@ -1,21 +1,28 @@
 import mongoose from "mongoose";
+const attachmentSchema = new mongoose.Schema(
+  {
+    fileId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    filename: { type: String, required: true },
+    size: { type: Number, required: true },
+    contentType: { type: String, default: "application/pdf" },
+  },
+  { _id: false },
+);
 const quoteSchema = new mongoose.Schema(
   {
     quoteId: { type: String, required: true, unique: true, index: true },
-    name: { type: String, required: true, trim: true },
-    companyName: { type: String, required: true, trim: true },
-    phone: { type: String, required: true, trim: true },
-    email: { type: String, trim: true, lowercase: true },
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
-    quantity: { type: Number, required: true, min: 1 },
-    unit: { type: String, required: true, trim: true },
-    deliveryLocation: { type: String, required: true, trim: true },
-    businessType: String,
-    message: String,
+    name: { type: String, required: true, trim: true, maxlength: 120 },
+    companyName: { type: String, required: true, trim: true, maxlength: 160 },
+    phone: { type: String, required: true, trim: true, maxlength: 40 },
+    email: { type: String, trim: true, lowercase: true, maxlength: 160 },
+    // productName is what the customer picked; product links the catalogue
+    // record when one matches.
+    productName: { type: String, required: true, trim: true, maxlength: 160 },
+    product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+    deliveryLocation: { type: String, required: true, trim: true, maxlength: 200 },
+    businessType: { type: String, trim: true, maxlength: 80 },
+    message: { type: String, trim: true, maxlength: 5000 },
+    attachment: attachmentSchema,
     status: {
       type: String,
       enum: ["NEW", "CONTACTED", "QUOTED", "CLOSED"],
