@@ -1,6 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
-import { Menu, Search, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import NavSearch from "./NavSearch";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -19,13 +20,7 @@ export default function Navbar() {
           <NavLink to="/contact">Contact</NavLink>
         </div>
         <div className="nav-tools">
-          <Link
-            to="/products"
-            className="nav-search"
-            aria-label="Search products"
-          >
-            <Search size={17} />
-          </Link>
+          <NavSearch className="nav-search-desktop" />
           <Link to="/request-quote" className="button button-dark nav-cta">
             Request Quote <span>↗</span>
           </Link>
@@ -40,6 +35,7 @@ export default function Navbar() {
       </nav>
       {open && (
         <div className="mobile-menu container">
+          <NavSearch onNavigate={() => setOpen(false)} />
           <NavLink onClick={() => setOpen(false)} to="/products">
             Products
           </NavLink>

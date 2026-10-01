@@ -5,6 +5,8 @@ import Button from "../components/common/Button";
 import WhatsAppButton from "../components/common/WhatsAppButton";
 import ProductGrid from "../components/product/ProductGrid";
 import EmptyState from "../components/common/EmptyState";
+import ContactPerson from "../components/common/ContactPerson";
+import { categoryColor, tint } from "../utils/colors";
 import { getProducts } from "../utils/storage";
 export default function ProductDetailsB2B() {
   const { slug } = useParams();
@@ -17,12 +19,12 @@ export default function ProductDetailsB2B() {
     return (
       <EmptyState
         title="Product not found"
-        message="This product is no longer in the catalogue."
+        message="We couldn’t find that one. It may have been renamed or taken out of the catalogue."
       />
     );
   const related = products.filter((item) => product.related?.includes(item.id));
   return (
-    <section className="page product-detail-page container">
+    <section className="page product-detail-page container" style={tint(categoryColor(product.category))}>
       <div className="breadcrumbs">
         <Link to="/">Home</Link>
         <ChevronRight size={14} />
@@ -32,7 +34,13 @@ export default function ProductDetailsB2B() {
       </div>
       <div className="product-detail-grid">
         <div className="detail-image">
-          <img src={product.image} alt={product.name} />
+          <img
+            src={product.image}
+            alt={product.name}
+            width="700"
+            height="520"
+            fetchpriority="high"
+          />
         </div>
         <div className="detail-copy-panel">
           <p className="eyebrow">
@@ -50,19 +58,19 @@ export default function ProductDetailsB2B() {
           </div>
           <div className="detail-actions">
             <Button to={`/request-quote?product=${product.slug}`}>
-              Request Quote
+              Ask for a price
             </Button>
             <WhatsAppButton product={product} />
           </div>
+          <ContactPerson intro="Questions about this product? Ask" />
         </div>
       </div>
       <div className="product-information">
         <div>
           <h2>Description</h2>
           <p>
-            {product.description} Designed for demanding professional
-            environments where repeatable results and dependable replenishment
-            matter.
+            {product.description} Not sure it suits your surfaces? Tell us
+            what you’re cleaning and we’ll confirm before you order.
           </p>
         </div>
         <div>
@@ -92,11 +100,11 @@ export default function ProductDetailsB2B() {
           </ul>
         </div>
         <div>
-          <h2>Usage Instructions</h2>
+          <h2>How to use it</h2>
           <p>{product.usage}</p>
         </div>
         <div>
-          <h2>Safety Information</h2>
+          <h2>Safety</h2>
           <p>{product.safety}</p>
         </div>
       </div>

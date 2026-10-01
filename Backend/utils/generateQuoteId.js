@@ -1,9 +1,14 @@
-import Quote from "../models/Quote.js";
+import { randomBytes } from "node:crypto";
 
-export async function generateQuoteId() {
-  const prefix = `QT-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}`;
-  const count = await Quote.countDocuments({
-    quoteId: new RegExp(`^${prefix}`),
-  });
-  return `${prefix}-${String(count + 1).padStart(3, "0")}`;
+// No 0/O or 1/I, so IDs read back cleanly over the phone.
+const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+// Random rather than sequential: sequential IDs collide when two quotes arrive
+// at once and let anyone guess other customers' quote numbers.
+export function generateQuoteId() {
+  const date = new Date().toISOString().slice(0, 10).replaceAll("-", "");
+  const suffix = [...randomBytes(6)]
+    .map((byte) => ALPHABET[byte % ALPHABET.length])
+    .join("");
+  return `QT-${date}-${suffix}`;
 }

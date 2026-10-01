@@ -27,9 +27,9 @@ export const corsMiddleware = cors({
 
     console.log("Blocked CORS origin:", origin);
 
-    return callback(
-      new Error(`Origin ${origin} is not allowed by CORS`)
-    );
+    const error = new Error(`Origin ${origin} is not allowed by CORS`);
+    error.statusCode = 403;
+    return callback(error);
   },
 
   methods: [
@@ -44,7 +44,10 @@ export const corsMiddleware = cors({
   allowedHeaders: [
     "Content-Type",
     "Authorization",
+    "x-admin-key",
   ],
+
+  exposedHeaders: ["Content-Disposition"],
 
   optionsSuccessStatus: 204,
 });

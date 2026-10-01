@@ -1,47 +1,32 @@
 import { products as seedProducts } from "./mockData";
 
 const PRODUCTS_KEY = "becommerce_products";
-const QUOTES_KEY = "becommerce_quote_requests";
+
+// Parse once per stored value: callers get the same array back until the data
+// changes, which keeps their useMemo dependencies stable between renders.
+let productsCache = { raw: undefined, value: seedProducts };
 
 export function getProducts() {
+  let raw = null;
   try {
-    const saved = JSON.parse(localStorage.getItem(PRODUCTS_KEY));
-    return Array.isArray(saved) ? saved : seedProducts;
+    raw = localStorage.getItem(PRODUCTS_KEY);
   } catch {
     return seedProducts;
   }
+  if (raw === productsCache.raw) return productsCache.value;
+  let value = seedProducts;
+  try {
+    const saved = JSON.parse(raw);
+    if (Array.isArray(saved)) value = saved;
+  } catch {
+    // fall back to the seed catalogue
+  }
+  productsCache = { raw, value };
+  return value;
 }
 export function saveProducts(products) {
   localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
   return products;
-}
-export function getQuoteRequests() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(QUOTES_KEY));
-    return Array.isArray(saved) ? saved : [];
-  } catch {
-    return [];
-  }
-}
-export function saveQuoteRequest(request) {
-  const requests = getQuoteRequests();
-  const saved = {
-    ...request,
-    id:
-      request.id ||
-      `QT-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
-    date: request.date || new Date().toISOString(),
-    status: request.status || "New",
-  };
-  localStorage.setItem(QUOTES_KEY, JSON.stringify([saved, ...requests]));
-  return saved;
-}
-export function updateQuoteStatus(id, status) {
-  const requests = getQuoteRequests().map((request) =>
-    request.id === id ? { ...request, status } : request,
-  );
-  localStorage.setItem(QUOTES_KEY, JSON.stringify(requests));
-  return requests;
 }
 export function removeProduct(id) {
   return saveProducts(

@@ -35,10 +35,23 @@ MongoDB must be running at `MONGO_URI` before seeding or starting the server. Th
 - `GET /api/solutions`
 - `GET /api/solutions/:slug`
 - `POST /api/quotes`
-- `GET /api/quotes/:quoteId`
+- `GET /api/quotes/:quoteId` (status only: quote ID, product, status, date)
 - `POST /api/contact`
 
-Quote example:
+Quotes are submitted as `multipart/form-data` so an optional PDF can be
+attached in the `attachment` field (PDF only, max 10 MB, stored in MongoDB
+GridFS bucket `quoteAttachments`). Required fields: `name`, `companyName`,
+`phone`, `product` (product name; `productSlug` optionally links the catalogue
+record) and `deliveryLocation`.
+
+```bash
+curl -X POST http://localhost:5000/api/quotes \
+  -F name="Rahul Sharma" -F companyName="ABC Industries" -F phone=9876543210 \
+  -F product="Heavy Duty Floor Cleaner" -F deliveryLocation=Noida \
+  -F attachment=@spec-sheet.pdf
+```
+
+Fields (JSON shown for readability):
 
 ```json
 {
@@ -46,12 +59,11 @@ Quote example:
   "companyName": "ABC Industries",
   "phone": "9876543210",
   "email": "rahul@example.com",
-  "product": "PRODUCT_OBJECT_ID",
-  "quantity": 500,
-  "unit": "L",
+  "product": "Heavy Duty Floor Cleaner",
+  "productSlug": "heavy-duty-floor-cleaner",
   "deliveryLocation": "Noida",
   "businessType": "Factory",
-  "message": "Need bulk pricing."
+  "message": "Need bulk pricing. 500 L per month."
 }
 ```
 
@@ -68,6 +80,7 @@ Send `x-admin-key: change_this_secret` (or the value configured in `.env`).
 - `PUT|DELETE /api/admin/solutions/:id`
 - `GET /api/admin/quotes?page=1&limit=20&status=NEW&search=ABC`
 - `PATCH /api/admin/quotes/:id/status` with `{ "status": "CONTACTED" }`
+- `GET /api/admin/quotes/:id/attachment` downloads the quote's PDF (`?inline=1` to view in the browser)
 - `GET /api/admin/contacts`
 
 All responses use `{ success, data, message }`; validation errors additionally include `errors`. Product/category/solution deletes are soft deletes.

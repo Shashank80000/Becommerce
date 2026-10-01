@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { useEffect } from "react";
 import { Check, ArrowUpRight } from "lucide-react";
 import Button from "../components/common/Button";
 import ProductGrid from "../components/product/ProductGrid";
@@ -20,6 +21,9 @@ export default function SolutionDetailsB2B() {
   const solution = solutions.find(
     (item) => item.slug === slug || item.slug === solutionAliases[slug],
   );
+  useEffect(() => {
+    if (solution) document.title = `${solution.title} | B.Ecommerce`;
+  }, [solution]);
   if (!solution)
     return (
       <section className="page centered-page">

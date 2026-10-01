@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { FileText, Paperclip, X } from "lucide-react";
 import Input from "../common/Input";
 import Button from "../common/Button";
 import { getProducts } from "../../utils/storage";
 import { submitQuote } from "../../services/quoteApi";
+import { business } from "../../utils/siteContent";
 
 const initial = {
   name: "",
@@ -11,12 +13,18 @@ const initial = {
   phone: "",
   email: "",
   product: "",
-  quantity: "",
-  unit: "Cases",
   location: "",
   businessType: "Factory",
   requirements: "",
 };
+// Must match MAX_PDF_BYTES in Backend/middleware/uploadMiddleware.js.
+const MAX_PDF_BYTES = 10 * 1024 * 1024;
+
+const formatSize = (bytes) =>
+  bytes < 1024 * 1024
+    ? `${Math.max(1, Math.round(bytes / 1024))} KB`
+    : `${Number((bytes / (1024 * 1024)).toFixed(1))} MB`;
+
 const businessTypes = [
   "Factory",
   "Office",
@@ -42,36 +50,91 @@ export default function QuoteForm({ bulk = false }) {
   });
   const [sent, setSent] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [pdf, setPdf] = useState(null);
+  const [pdfError, setPdfError] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [dragging, setDragging] = useState(false);
+  const fileInput = useRef(null);
   const update = (key, value) => setForm({ ...form, [key]: value });
-  const send = (event) => {
+
+  const choosePdf = (file) => {
+    setPdfError("");
+    if (!file) return;
+    const isPdf =
+      file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (!isPdf) return setPdfError("Only PDF files can be attached.");
+    if (file.size > MAX_PDF_BYTES)
+      return setPdfError(
+        `This PDF is ${formatSize(file.size)}. The limit is ${formatSize(MAX_PDF_BYTES)}.`,
+      );
+    setPdf(file);
+  };
+
+  const removePdf = () => {
+    setPdf(null);
+    setPdfError("");
+    if (fileInput.current) fileInput.current.value = "";
+  };
+
+  const send = async (event) => {
     event.preventDefault();
+    setSubmitError("");
     setLoading(true);
-    setTimeout(() => {
-      setSent(submitQuote(form));
+    try {
+      const selected = products.find((item) => item.name === form.product);
+      const result = await submitQuote(
+        {
+          name: form.name,
+          companyName: form.company,
+          phone: form.phone,
+          email: form.email,
+          product: form.product,
+          productSlug: selected?.slug,
+          deliveryLocation: form.location,
+          businessType: form.businessType,
+          message: form.requirements,
+        },
+        pdf,
+      );
+      setSent({ ...result, firstName: form.name.trim().split(/\s+/)[0], phone: form.phone, email: form.email });
+    } catch (error) {
+      setSubmitError(error.message);
+    } finally {
       setLoading(false);
-    }, 450);
+    }
   };
   if (sent)
     return (
       <div className="success">
         <span>✓</span>
-        <h2>Quote Request Submitted</h2>
+        <h2>Thanks, {sent.firstName}. We’ve got it.</h2>
         <p>
-          Your request ID is: <strong>{sent.id}</strong>
+          Your reference is <strong>{sent.quoteId}</strong>
+          {sent.attachment && <> · {sent.attachment.filename} attached</>}.
         </p>
-        <p>Your sales team can contact you shortly.</p>
+        <ol className="next-steps">
+          <li>Someone from our sales team reads your request {business.responseTime}.</li>
+          <li>
+            We’ll call you on <strong>{sent.phone}</strong> if anything needs
+            checking.
+          </li>
+          <li>
+            You get a written quote{sent.email ? <> at <strong>{sent.email}</strong></> : ""}. No obligation.
+          </li>
+        </ol>
         <div className="success-actions">
           <Link className="text-button" to="/products">
-            Back to Products
+            Keep browsing
           </Link>
           <button
             className="clear-button"
             onClick={() => {
               setSent(null);
               setForm(initial);
+              removePdf();
             }}
           >
-            Submit Another Request
+            Send another request
           </button>
         </div>
       </div>
@@ -121,29 +184,6 @@ export default function QuoteForm({ bulk = false }) {
           </select>
         </label>
         <Input
-          label="Quantity"
-          type="number"
-          min="1"
-          value={form.quantity}
-          onChange={(event) => update("quantity", event.target.value)}
-          required
-        />
-      </div>
-      <div className="form-two">
-        <label className="field">
-          <span>Unit *</span>
-          <select
-            value={form.unit}
-            onChange={(event) => update("unit", event.target.value)}
-          >
-            <option>Cases</option>
-            <option>Drums</option>
-            <option>Pallets</option>
-            <option>Pieces</option>
-            <option>Bulk</option>
-          </select>
-        </label>
-        <Input
           label="Delivery Location"
           value={form.location}
           onChange={(event) => update("location", event.target.value)}
@@ -161,21 +201,81 @@ export default function QuoteForm({ bulk = false }) {
           ))}
         </select>
       </label>
-      <Input
-        label="Additional Requirements"
-        textarea
-        rows="4"
-        value={form.requirements}
-        onChange={(event) => update("requirements", event.target.value)}
-      />
+      <div className="field requirements-field">
+        <label htmlFor="quote-requirements" className="field-label">
+          Additional Requirements
+        </label>
+        <textarea
+          id="quote-requirements"
+          rows="4"
+          value={form.requirements}
+          onChange={(event) => update("requirements", event.target.value)}
+          placeholder="e.g. 200 L a month for 3 sites, delivered on Mondays"
+        />
+        {pdf ? (
+          <div className="pdf-attached">
+            <FileText size={20} aria-hidden="true" />
+            <div>
+              <strong>{pdf.name}</strong>
+              <small>{formatSize(pdf.size)}</small>
+            </div>
+            <button
+              type="button"
+              onClick={removePdf}
+              aria-label={`Remove ${pdf.name}`}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        ) : (
+          <label
+            className={`pdf-drop${dragging ? " is-dragging" : ""}`}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(event) => {
+              event.preventDefault();
+              setDragging(false);
+              choosePdf(event.dataTransfer.files[0]);
+            }}
+          >
+            <input
+              ref={fileInput}
+              type="file"
+              accept="application/pdf,.pdf"
+              onChange={(event) => choosePdf(event.target.files[0])}
+            />
+            <Paperclip size={18} aria-hidden="true" />
+            <div>
+              <strong>Attach a PDF</strong>
+              <small>
+                Spec sheet, tender or product list · PDF up to{" "}
+                {formatSize(MAX_PDF_BYTES)}
+              </small>
+            </div>
+          </label>
+        )}
+        {pdfError && (
+          <small className="field-error" role="alert">
+            {pdfError}
+          </small>
+        )}
+      </div>
       {bulk && (
         <p className="form-note">
-          Large recurring orders can include delivery coordination and
-          customized pricing.
+          Ordering for several sites, or every month? Mention it and we’ll set
+          up regular deliveries and pricing to match.
         </p>
       )}
-      <Button type="submit">
-        {loading ? "Submitting..." : "Request Bulk Quote"}
+      {submitError && (
+        <p className="field-error" role="alert">
+          {submitError}
+        </p>
+      )}
+      <Button type="submit" disabled={loading}>
+        {loading ? "Sending…" : "Send my request"}
       </Button>
     </form>
   );

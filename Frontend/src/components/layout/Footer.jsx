@@ -1,48 +1,70 @@
 import { Link } from "react-router-dom";
 import WhatsAppButton from "../common/WhatsAppButton";
+import OpenStatus from "../common/OpenStatus";
+import { business } from "../../utils/siteContent";
+
 export default function Footer() {
+  const socials = [
+    ["LinkedIn", business.social.linkedin],
+    ["Instagram", business.social.instagram],
+  ].filter(([, url]) => url);
+
   return (
     <footer className="footer">
       <div className="container footer-grid">
         <div>
           <Link to="/" className="brand footer-brand">
             <span className="brand-mark">B</span>
-            <span>B.Ecommerce</span>
+            <span>{business.name}</span>
           </Link>
           <p className="muted">
-            Professional cleaning products
+            Cleaning supplies for businesses,
             <br />
-            for businesses and industries.
+            and real people to help you choose.
           </p>
           <WhatsAppButton />
         </div>
         <div>
           <p className="footer-label">Company</p>
-          <Link to="/about">About</Link>
+          <Link to="/about">About us</Link>
           <Link to="/contact">Contact</Link>
-          <Link to="/bulk-orders">Bulk Orders</Link>
-          <Link to="/request-quote">Request Quote</Link>
+          <Link to="/bulk-orders">Bulk orders</Link>
+          <Link to="/request-quote">Ask for a price</Link>
         </div>
         <div>
           <p className="footer-label">Products</p>
-          <Link to="/products">Product catalogue</Link>
-          <Link to="/solutions">Solutions</Link>
-          <Link to="/admin">Admin demo</Link>
+          <Link to="/products">All products</Link>
+          <Link to="/solutions">By industry</Link>
         </div>
         <div>
-          <p className="footer-label">Contact</p>
-          <a href="mailto:hello@becommerce.co">hello@becommerce.co</a>
-          <a href="tel:+15551234567">+1 (555) 123-4567</a>
+          <p className="footer-label">Talk to us</p>
+          {business.email && <a href={`mailto:${business.email}`}>{business.email}</a>}
+          {business.phone && <a href={`tel:${business.phoneHref}`}>{business.phone}</a>}
           <p className="muted">
-            120 Commerce Way
-            <br />
-            Mon–Fri, 8am–6pm
+            {business.address && (
+              <>
+                {business.address}
+                <br />
+              </>
+            )}
+            {business.hours.label}
           </p>
+          <OpenStatus />
         </div>
       </div>
       <div className="container footer-bottom">
-        <span>© 2025 B.Ecommerce</span>
-        <span>LinkedIn · Instagram</span>
+        <span>
+          © {new Date().getFullYear()} {business.name}
+        </span>
+        {socials.length > 0 && (
+          <span className="footer-social">
+            {socials.map(([label, url]) => (
+              <a key={label} href={url} target="_blank" rel="noreferrer">
+                {label}
+              </a>
+            ))}
+          </span>
+        )}
       </div>
     </footer>
   );

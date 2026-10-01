@@ -1,3 +1,5 @@
+import { colorAt } from "./palette";
+
 export const WHATSAPP_NUMBER = "15551234567";
 
 const image = (label, color = "d7e5df") =>
@@ -257,7 +259,8 @@ export const products = productSeed.map(
     sizes,
     popularity,
     color,
-    image: image(name, color),
+    // Placeholder image tinted with the category's colour (see palette.js).
+    image: image(name, colorAt(Math.max(0, categories.indexOf(category))).soft.slice(1)),
     status: "Active",
     createdAt: `2025-0${(index % 9) + 1}-15`,
     features: [
@@ -314,23 +317,23 @@ export const solutions = industries.map((name, index) => ({
 
 export const faqs = [
   [
-    "Do you supply products in bulk?",
-    "Yes. We supply single cases through recurring pallet and bulk programs, with pricing tailored to volume and delivery cadence.",
+    "Do I have to order in bulk?",
+    "Not at all. You can start with a single case. If you buy regularly or in larger amounts, tell us and we’ll price it to match.",
   ],
   [
-    "Can I request custom pricing?",
-    "Absolutely. Share your product mix and estimated quantities through the quote form and our sales team will prepare a business quote.",
+    "How do I get a price?",
+    "Send us the quote form with roughly what you need. It takes about two minutes. Someone from our team will come back to you with prices, usually by phone first if anything needs checking.",
   ],
   [
-    "What areas do you deliver to?",
-    "We coordinate commercial delivery across major cities and can discuss scheduled delivery for multi-site operations.",
+    "Where do you deliver?",
+    "Tell us where you are in the quote form and we’ll confirm delivery and timing. If you have several sites, we can schedule them together.",
   ],
   [
-    "Do you provide products for factories?",
-    "Yes. Our range covers factory floors, machinery, washrooms, waste handling, and staff hygiene.",
+    "I’m not sure which product I need. Can you help?",
+    "That’s most of what we do. Tell us what you’re cleaning, the surface, and how often, or send a photo, and we’ll suggest what works.",
   ],
   [
-    "Can I request a product sample?",
-    "Sample availability depends on the product. Mention it in your requirements and the team will confirm options.",
+    "Can I try a sample first?",
+    "For many products, yes. Mention it in your request and we’ll let you know what’s available.",
   ],
 ];

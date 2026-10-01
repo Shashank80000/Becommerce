@@ -1,11 +1,13 @@
-import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import ProductGrid from "../components/product/ProductGrid";
 import ProductFilter from "../components/product/ProductFilter";
 import ProductSearch from "../components/product/ProductSearch";
 import EmptyState from "../components/common/EmptyState";
+import ProductHeroScene from "../components/product/ProductHeroScene";
 import { getProducts } from "../utils/storage";
 import { categories, applications, packSizes } from "../utils/mockData";
+import { matchesQuery, productText } from "../utils/search";
 
 const normalize = (value) =>
   value.toLowerCase().replaceAll("-", " ").replace(/s$/, "").trim();
@@ -16,19 +18,32 @@ export default function ProductsB2B() {
   const matchedCategory = category
     ? categories.find((item) => normalize(item) === normalize(category))
     : null;
-  const [query, setQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get("q") || "";
+  const setQuery = (value) =>
+    setSearchParams(
+      (params) => {
+        if (value) params.set("q", value);
+        else params.delete("q");
+        return params;
+      },
+      { replace: true },
+    );
+  const categoryFilter = matchedCategory || (category ? "__invalid__" : "All");
   const [filters, setFilters] = useState({
-    category: matchedCategory || (category ? "__invalid__" : "All"),
+    category: categoryFilter,
     application: "All",
     packSize: "All",
   });
+  // The route is reused between categories, so follow the URL when it changes.
+  useEffect(() => {
+    setFilters((current) => ({ ...current, category: categoryFilter }));
+  }, [categoryFilter]);
   const [sort, setSort] = useState("Popular");
   const shown = useMemo(() => {
     const result = products.filter((product) => {
-      const text =
-        `${product.name} ${product.category} ${product.application} ${product.description}`.toLowerCase();
       return (
-        text.includes(query.toLowerCase()) &&
+        matchesQuery(productText(product), query) &&
         (filters.category === "All" || product.category === filters.category) &&
         (filters.application === "All" ||
           product.applications.includes(filters.application)) &&
@@ -47,17 +62,23 @@ export default function ProductsB2B() {
   }, [products, query, filters, sort]);
   return (
     <section className="page catalogue-page container">
-      <div className="page-intro">
-        <p className="eyebrow">Product catalogue</p>
-        <h1>
-          Professional products
-          <br />
-          <em>for serious work.</em>
-        </h1>
-        <p>
-          Commercial-grade cleaning chemicals, hygiene essentials, and tools
-          supplied in business-ready pack sizes.
-        </p>
+      <div className="catalogue-hero">
+        <ProductHeroScene category={filters.category} />
+        <div className="page-intro">
+          <p className="eyebrow">
+            Product catalogue
+            {categories.includes(filters.category) && ` · ${filters.category}`}
+          </p>
+          <h1>
+            Professional products
+            <br />
+            <em>for serious work.</em>
+          </h1>
+          <p>
+            Everything we stock, in the sizes businesses actually buy. Can’t
+            see what you need? Ask us. We can usually find it.
+          </p>
+        </div>
       </div>
       <div className="catalogue-layout">
         <aside>
@@ -81,7 +102,7 @@ export default function ProductsB2B() {
               <option>Newest</option>
             </select>
           </div>
-          <div className="result-count">{shown.length} products found</div>
+          <div className="result-count">{shown.length} product{shown.length === 1 ? "" : "s"} found</div>
           {shown.length ? (
             <ProductGrid products={shown} />
           ) : (

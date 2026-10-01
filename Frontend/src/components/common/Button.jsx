@@ -5,6 +5,7 @@ export default function Button({
   to,
   type = "button",
   className = "",
+  disabled,
 }) {
   const classes = `button button-dark ${className}`;
   return to ? (
@@ -12,7 +13,7 @@ export default function Button({
       {children} <span>↗</span>
     </Link>
   ) : (
-    <button className={classes} type={type}>
+    <button className={classes} type={type} disabled={disabled}>
       {children} <span>↗</span>
     </button>
   );
