@@ -11,7 +11,7 @@ export const business = {
   // Shown in the footer and on the contact page. Leave "" to hide.
   phone: "+1 (555) 123-4567", // TODO: real number
   phoneHref: "+15551234567", // digits only, for tel: links
-  whatsapp: "15551234567", // TODO: country code + number, no "+" or spaces
+  whatsapp: "918595088789", // TODO: country code + number, no "+" or spaces
   email: "hello@becommerce.co", // TODO: real inbox
   address: "", // e.g. "Plot 12, Sector 63, Noida, UP 201301". Adds a map when set.
   // Opening hours. Used for the "open now" line, so set timeZone to where the
