@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import {
-  Truck,
-  BadgeDollarSign,
+  Package,
+  BadgeIndianRupee,
   ShieldCheck,
   Headset,
-  Zap,
+  Check,
   ArrowUpRight,
   Factory,
   Building2,
@@ -19,25 +19,22 @@ import {
 import ProductGrid from "../components/product/ProductGrid";
 import FAQ from "../components/common/FAQ";
 import WhatsAppButton from "../components/common/WhatsAppButton";
-import HandNote from "../components/common/HandNote";
 import Testimonials from "../components/common/Testimonials";
 import { business } from "../utils/siteContent";
 import { categoryColor, colorAt, industryColor, tint } from "../utils/colors";
-import ProductHeroScene from "../components/product/ProductHeroScene";
 import useReveal from "../hooks/useReveal";
 
+// Each benefit takes a palette colour for its icon tile (see utils/palette.js).
 const benefits = [
-  "By the case or the pallet",
-  "Prices that fit your volume",
-  "Same product, every order",
-  "A real person to call",
-  "Delivery on your schedule",
+  { text: "Wide range of housekeeping products", Icon: Package, color: 6 },
+  { text: "Prices that fit your volume", Icon: BadgeIndianRupee, color: 1 },
+  { text: "Same product, every order", Icon: ShieldCheck, color: 2 },
+  { text: "A real person to call", Icon: Headset, color: 3 },
 ];
 // Staggers items that reveal together (see [data-reveal] in index.css).
 const stagger = (index) => ({ "--i": index });
 import { getProducts } from "../utils/storage";
 import { categories, faqs, industries } from "../utils/mockData";
-const icons = [Truck, BadgeDollarSign, ShieldCheck, Headset, Zap];
 const industryIcons = [
   Factory,
   Building2,
@@ -76,47 +73,28 @@ export default function HomeB2B() {
               </Link>
             </div>
             <div className="hero-proof">
-              <span>✓ We reply {business.responseTime}</span>
-              <span>✓ One case or a full pallet</span>
-            </div>
-          </div>
-          <div className="hero-visual clean-visual home-visual">
-            <ProductHeroScene className="hero-scene--home" />
-            <div className="clean-product">
-              <span>A NOTE FROM US</span>
-              <HandNote signature={`The ${business.name} team`}>
-                Not sure what to order? Send us a photo of the job, or the
-                list you buy now. We’ll tell you what works, and where you
-                can save.
-              </HandNote>
-            </div>
-            <div className="visual-sticker">
-              REAL PEOPLE
-              <br />
-              ON THE PHONE
+              <span>
+                <Check size={15} /> We reply {business.responseTime}
+              </span>
+              <span>
+                <Check size={15} /> One case or a full pallet
+              </span>
             </div>
           </div>
         </div>
+        {/* Product photo bleeds off the right edge and fades into the copy. */}
+        <div className="hero-photo" aria-hidden="true">
+          <img src="/hero-cleaning.jpg" alt="" fetchPriority="high" />
+        </div>
       </section>
       <section className="benefits" aria-label="Why order from us">
-        {/* A slow ticker; the copy is repeated once so the loop is seamless. */}
-        <div className="benefit-marquee">
-          <div className="benefit-track">
-            {[...benefits, ...benefits].map((item, index) => {
-              const Icon = icons[index % benefits.length];
-              return (
-                <div
-                  className="benefit"
-                  key={`${item}-${index}`}
-                  style={tint(colorAt(index % benefits.length))}
-                  aria-hidden={index >= benefits.length || undefined}
-                >
-                  <Icon size={22} />
-                  <span>{item}</span>
-                </div>
-              );
-            })}
-          </div>
+        <div className="container benefit-grid">
+          {benefits.map(({ text, Icon, color }) => (
+            <div className="benefit" key={text} style={tint(colorAt(color))}>
+              <Icon size={22} />
+              <span>{text}</span>
+            </div>
+          ))}
         </div>
       </section>
       <section className="section container">
@@ -124,17 +102,15 @@ export default function HomeB2B() {
           <div>
             <p className="eyebrow">Start here</p>
             <h2>
-              What are you
-              <br />
-              <em>cleaning?</em>
+              What are you <em>cleaning?</em>
             </h2>
           </div>
           <Link to="/products" className="text-button">
             View all products <ArrowUpRight size={15} />
           </Link>
         </div>
-        <div className="category-grid">
-          {categories.map((category, index) => (
+        <div className="category-grid category-grid--home">
+          {categories.slice(0, 8).map((category, index) => (
             <Link
               className="category-card"
               data-reveal
