@@ -4105,3 +4105,163 @@ h3 {
     margin: 50px auto 0;
   }
 }
+
+/* ==========================================================================
+   Home hero: copy on the left, product photo bleeding off the right edge
+   ========================================================================== */
+.hero.hero-b2b {
+  padding: 64px 0 72px;
+  background:
+    radial-gradient(520px 420px at 0% 30%, rgba(200, 232, 108, 0.32), transparent 70%),
+    radial-gradient(420px 320px at 30% 100%, rgba(63, 180, 232, 0.14), transparent 70%),
+    #fbfcf8;
+}
+.hero-b2b .hero-b2b-grid {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+.hero-b2b .hero-enter {
+  max-width: 660px;
+}
+.hero-b2b h1 {
+  font-size: clamp(44px, 4.3vw, 64px);
+}
+.hero-b2b .hero-copy {
+  max-width: 490px;
+  font-size: 18px;
+  color: #4d5652;
+}
+.hero-b2b .hero-actions .button {
+  min-height: 54px;
+  padding: 0 24px;
+  border-radius: 6px;
+}
+.hero-b2b .hero-proof {
+  font-size: 13px;
+}
+.hero-proof span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.hero-proof svg {
+  color: #2a7a5a;
+}
+.hero-photo {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 58%;
+  z-index: 0;
+  /* Fade the left edge of the photo into the hero background. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 32%);
+  mask-image: linear-gradient(90deg, transparent, #000 32%);
+}
+.hero-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  display: block;
+  animation: hero-photo-in 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+@keyframes hero-photo-in {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+
+/* Benefits: four fixed items on the night band */
+.benefits .benefit-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+.benefits .benefit {
+  justify-content: flex-start;
+  gap: 18px;
+  min-height: 78px;
+  padding: 0 24px;
+  font-size: 15px;
+}
+.benefits .benefit:first-child {
+  padding-left: 0;
+}
+.benefits .benefit:last-child {
+  border-right: 0;
+}
+.benefits .benefit svg {
+  padding: 11px;
+}
+
+/* Home categories: one row of eight */
+.category-grid--home {
+  grid-template-columns: repeat(8, 1fr);
+}
+.category-grid--home .category-card {
+  min-height: 96px;
+  padding: 14px;
+  border-radius: 10px;
+  border-top-width: 3px;
+}
+.category-grid--home .category-card strong {
+  font-size: 14px;
+}
+
+@media (max-width: 1060px) {
+  .hero-photo {
+    width: 52%;
+  }
+  .benefits .benefit-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .benefits .benefit:nth-child(2n) {
+    border-right: 0;
+  }
+  .benefits .benefit:nth-child(-n + 2) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .benefits .benefit:nth-child(odd) {
+    padding-left: 0;
+  }
+  .category-grid--home {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  .hero.hero-b2b {
+    padding: 48px 0 0;
+  }
+  .hero-photo {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    margin-top: 36px;
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%);
+    mask-image: linear-gradient(180deg, transparent, #000 22%);
+  }
+  .hero-photo img {
+    object-position: center bottom;
+  }
+  .benefits .benefit-grid {
+    grid-template-columns: 1fr;
+  }
+  .benefits .benefit,
+  .benefits .benefit:nth-child(odd) {
+    padding: 0;
+    min-height: 64px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .benefits .benefit:last-child {
+    border-bottom: 0;
+    grid-column: auto;
+  }
+  .category-grid--home {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-photo img {
+    animation: none;
+  }
+}
