@@ -4183,6 +4183,9 @@ h3 {
   padding: 0 24px;
   font-size: 15px;
 }
+.benefits .benefit {
+  white-space: normal;
+}
 .benefits .benefit:first-child {
   padding-left: 0;
 }
@@ -4208,8 +4211,20 @@ h3 {
 }
 
 @media (max-width: 1060px) {
+  /* Too narrow to overlay the copy, so the photo drops below it. */
+  .hero.hero-b2b {
+    padding-bottom: 0;
+  }
   .hero-photo {
-    width: 52%;
+    position: relative;
+    width: 100%;
+    height: 380px;
+    margin-top: 40px;
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%);
+    mask-image: linear-gradient(180deg, transparent, #000 22%);
+  }
+  .hero-photo img {
+    object-position: center 70%;
   }
   .benefits .benefit-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -4229,15 +4244,11 @@ h3 {
 }
 @media (max-width: 760px) {
   .hero.hero-b2b {
-    padding: 48px 0 0;
+    padding-top: 48px;
   }
   .hero-photo {
-    position: relative;
-    width: 100%;
     height: 260px;
     margin-top: 36px;
-    -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%);
-    mask-image: linear-gradient(180deg, transparent, #000 22%);
   }
   .hero-photo img {
     object-position: center bottom;
