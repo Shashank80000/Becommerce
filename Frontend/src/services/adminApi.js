@@ -1,9 +1,10 @@
 import { API_URL } from "./api";
 
-const KEY_STORAGE = "becommerce_admin_key";
+const TOKEN_STORAGE = "becommerce_admin_token";
 export const ADMIN_LOGOUT_EVENT = "becommerce:admin-logout";
 
-const getAdminKey = () => sessionStorage.getItem(KEY_STORAGE) || "";
+export const getAdminToken = () =>
+  sessionStorage.getItem(TOKEN_STORAGE) || "";
 
 export async function loginAdmin(apiKey) {
   const response = await fetch(`${API_URL}/admin/login`, {
@@ -17,11 +18,22 @@ export async function loginAdmin(apiKey) {
     throw new Error(data.message || "Invalid admin key");
   }
 
+  if (!data.token) {
+    throw new Error(
+      data.message ||
+        "The server is using an old admin login API. Redeploy the backend.",
+    );
+  }
+  sessionStorage.setItem(TOKEN_STORAGE, data.token);
   return data;
 }
 
 async function adminFetch(path, options = {}) {
-  const headers = { "x-admin-key": getAdminKey(), ...options.headers };
+  const token = getAdminToken();
+  const headers = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...options.headers,
+  };
   if (options.body && !(options.body instanceof FormData))
     headers["Content-Type"] = "application/json";
 
@@ -32,7 +44,7 @@ async function adminFetch(path, options = {}) {
     throw new Error("Can't reach the server. Check your connection and try again.");
   }
   if (response.status === 401) {
-    sessionStorage.removeItem(KEY_STORAGE);
+    sessionStorage.removeItem(TOKEN_STORAGE);
     window.dispatchEvent(new Event(ADMIN_LOGOUT_EVENT));
     throw new Error("Your admin session has expired. Please sign in again.");
   }

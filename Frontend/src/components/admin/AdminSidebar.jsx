@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 export default function AdminSidebar({ onLogout }) {
   function handleLogout() {
-    sessionStorage.removeItem("becommerce_admin_key");
+    sessionStorage.removeItem("becommerce_admin_token");
     onLogout();
   }
 

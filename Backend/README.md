@@ -22,7 +22,8 @@ MongoDB must be running at `MONGO_URI` before seeding or starting the server. Th
 - `PORT`: API port, default `5000` (hosting platforms normally provide this automatically)
 - `MONGO_URI`: MongoDB connection string. Use the MongoDB Atlas `mongodb+srv://` URI in production.
 - `CLIENT_URL`: comma-separated allowed frontend origins. This is required when `NODE_ENV=production`, for example `https://www.example.com,https://example.com`. Use origins only: do not include `/api` or a trailing slash.
-- `ADMIN_API_KEY`: temporary admin key sent as `x-admin-key`
+- `ADMIN_API_KEY`: admin login secret; it is exchanged for a JWT and never sent on admin API requests
+- `JWT_SECRET`: long random secret used to sign admin JWTs
 - `NODE_ENV`: `development` or `production`
 
 ## Public endpoints
@@ -69,7 +70,18 @@ Fields (JSON shown for readability):
 
 ## Admin endpoints
 
-Send `x-admin-key: change_this_secret` (or the value configured in `.env`).
+First log in with the admin key, then use the returned JWT:
+
+```bash
+curl -X POST http://localhost:5000/api/admin/login \
+  -H "Content-Type: application/json" \
+  -d "{\"apiKey\":\"change_this_secret\"}"
+```
+
+```bash
+curl http://localhost:5000/api/admin/dashboard \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
 
 - `GET /api/admin/dashboard`
 - `GET|POST /api/admin/products`
@@ -87,13 +99,16 @@ All responses use `{ success, data, message }`; validation errors additionally i
 
 ## Deployment
 
-Set the following environment variables in the backend hosting provider; do not commit them to Git:
+Set the following environment variables in the backend hosting provider; do not
+commit them to Git. After changing `JWT_SECRET`, redeploy the backend and sign
+in again because existing tokens will no longer be valid:
 
 ```env
 NODE_ENV=production
 MONGO_URI=mongodb+srv://USERNAME:PASSWORD@CLUSTER.mongodb.net/cleaning_products?retryWrites=true&w=majority
 CLIENT_URL=https://www.example.com,https://example.com
 ADMIN_API_KEY=a-long-random-secret
+JWT_SECRET=a-different-long-random-secret
 ```
 
 Start command: `npm start`.

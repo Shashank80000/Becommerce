@@ -14,6 +14,7 @@ const blank = {
   image: "https://placehold.co/700x520/d7e5df/17322c?text=Cleaning+Product",
   status: "Active",
 };
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export default function AdminProductForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,7 +29,33 @@ export default function AdminProductForm() {
         }
       : blank,
   );
+  const [imageError, setImageError] = useState("");
   const update = (key, value) => setForm({ ...form, [key]: value });
+  const selectImage = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setImageError("Please choose an image file.");
+      event.target.value = "";
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      setImageError("Image must be 5 MB or smaller.");
+      event.target.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result !== "string") {
+        setImageError("The image could not be read. Please try again.");
+        return;
+      }
+      setImageError("");
+      update("image", reader.result);
+    };
+    reader.onerror = () => setImageError("The image could not be read. Please try again.");
+    reader.readAsDataURL(file);
+  };
   const save = (event) => {
     event.preventDefault();
     saveProduct({
@@ -136,9 +163,27 @@ export default function AdminProductForm() {
             onChange={(e) => update("specifications", e.target.value)}
           />
         </div>
+        <div className="form-two">
+          <div>
+            <label className="field">
+              <span>Upload product image</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={selectImage}
+              />
+            </label>
+            <p className="form-help">JPG, PNG, WEBP, or GIF up to 5 MB.</p>
+            {imageError && <p className="field-error">{imageError}</p>}
+          </div>
+          <div className="product-image-preview">
+            <span>Preview</span>
+            <img src={form.image} alt="Product preview" />
+          </div>
+        </div>
         <Input
-          label="Image URL"
-          value={form.image}
+          label="Image URL (optional)"
+          value={form.image.startsWith("data:") ? "" : form.image}
           onChange={(e) => update("image", e.target.value)}
         />
         <button className="button button-dark" type="submit">

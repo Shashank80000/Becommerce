@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import Product from "../models/Product.js";
 import Quote from "../models/Quote.js";
 import Category from "../models/Category.js";
@@ -6,11 +7,21 @@ import Solution from "../models/Solution.js";
 export function loginAdmin(req, res) {
   const providedKey = req.body?.apiKey;
 
-  if (!providedKey || !process.env.ADMIN_API_KEY || providedKey !== process.env.ADMIN_API_KEY) {
+  if (!process.env.ADMIN_API_KEY || !process.env.JWT_SECRET) {
+    return res.status(503).json({
+      success: false,
+      message: "Admin authentication is not configured on the server",
+    });
+  }
+
+  if (!providedKey || providedKey !== process.env.ADMIN_API_KEY) {
     return res.status(401).json({ success: false, message: "Invalid admin key" });
   }
 
-  return res.json({ success: true, message: "Admin key verified" });
+  const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, {
+    expiresIn: "2h",
+  });
+  return res.json({ success: true, token, expiresIn: "2h" });
 }
 
 export async function dashboard(req, res, next) {

@@ -68,7 +68,7 @@ function Layout() {
 }
 function AdminLayout() {
   const [authenticated, setAuthenticated] = useState(
-    () => Boolean(sessionStorage.getItem("becommerce_admin_key")),
+    () => Boolean(sessionStorage.getItem("becommerce_admin_token")),
   );
 
   // adminApi fires this when the server rejects the stored key.

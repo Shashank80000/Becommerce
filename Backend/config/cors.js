@@ -44,7 +44,6 @@ export const corsMiddleware = cors({
   allowedHeaders: [
     "Content-Type",
     "Authorization",
-    "x-admin-key",
   ],
 
   exposedHeaders: ["Content-Disposition"],

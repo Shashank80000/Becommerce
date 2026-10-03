@@ -14,7 +14,6 @@ export default function AdminLogin({ onAuthenticated }) {
 
     try {
       await loginAdmin(apiKey);
-      sessionStorage.setItem("becommerce_admin_key", apiKey);
       onAuthenticated();
     } catch (loginError) {
       setError(loginError.message);
@@ -32,7 +31,7 @@ export default function AdminLogin({ onAuthenticated }) {
         <p className="eyebrow">Restricted area</p>
         <h1>Admin sign in</h1>
         <p className="admin-login-copy">
-          Enter the admin API key to access catalogue and quote operations.
+          Sign in securely to access catalogue and quote operations.
         </p>
         <form onSubmit={handleSubmit}>
           <label className="field">
