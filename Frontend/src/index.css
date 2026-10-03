@@ -830,6 +830,34 @@ body {
 .button-whatsapp svg {
   color: #36834f;
 }
+.floating-whatsapp {
+  position: fixed;
+  z-index: 100;
+  right: 20px;
+  bottom: 20px;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border-radius: 50%;
+  background: #25d366;
+  color: white;
+  box-shadow: 0 10px 24px #17322c35;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.floating-whatsapp:hover {
+  color: white;
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 14px 28px #17322c45;
+}
+@media (max-width: 760px) {
+  .floating-whatsapp {
+    right: 14px;
+    bottom: 14px;
+    width: 54px;
+    height: 54px;
+  }
+}
 .hero-b2b {
   background: var(--cream);
   padding: 95px 0 105px;

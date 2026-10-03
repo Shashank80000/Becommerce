@@ -3,6 +3,7 @@ import { Suspense, lazy, useEffect, useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import Loader from "../components/common/Loader";
+import FloatingWhatsApp from "../components/common/FloatingWhatsApp";
 import { ADMIN_LOGOUT_EVENT } from "../services/adminApi";
 import Home from "../pages/HomeB2B";
 import Products from "../pages/ProductsB2B";
@@ -63,6 +64,7 @@ function Layout() {
         <Outlet />
       </main>
       <Footer />
+      <FloatingWhatsApp />
     </>
   );
 }
