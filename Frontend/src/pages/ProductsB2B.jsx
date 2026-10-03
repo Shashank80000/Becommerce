@@ -5,7 +5,7 @@ import ProductFilter from "../components/product/ProductFilter";
 import ProductSearch from "../components/product/ProductSearch";
 import EmptyState from "../components/common/EmptyState";
 import ProductHeroScene from "../components/product/ProductHeroScene";
-import { getProducts } from "../utils/storage";
+import { getProducts } from "../services/productApi";
 import { categories, applications, packSizes } from "../utils/mockData";
 import { matchesQuery, productText } from "../utils/search";
 
@@ -14,7 +14,11 @@ const normalize = (value) =>
 
 export default function ProductsB2B() {
   const { category } = useParams();
-  const products = getProducts();
+  const [products, setProducts] = useState([]);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    getProducts().then(setProducts).catch((loadError) => setError(loadError.message));
+  }, []);
   const matchedCategory = category
     ? categories.find((item) => normalize(item) === normalize(category))
     : null;
@@ -103,7 +107,9 @@ export default function ProductsB2B() {
             </select>
           </div>
           <div className="result-count">{shown.length} product{shown.length === 1 ? "" : "s"} found</div>
-          {shown.length ? (
+          {error ? (
+            <EmptyState title="Catalogue unavailable" message={error} />
+          ) : shown.length ? (
             <ProductGrid products={shown} />
           ) : (
             <EmptyState

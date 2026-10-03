@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Check, ChevronRight } from "lucide-react";
 import Button from "../components/common/Button";
 import WhatsAppButton from "../components/common/WhatsAppButton";
@@ -7,11 +7,14 @@ import ProductGrid from "../components/product/ProductGrid";
 import EmptyState from "../components/common/EmptyState";
 import ContactPerson from "../components/common/ContactPerson";
 import { categoryColor, tint } from "../utils/colors";
-import { getProducts } from "../utils/storage";
+import { getProduct } from "../services/productApi";
 export default function ProductDetailsB2B() {
   const { slug } = useParams();
-  const products = getProducts();
-  const product = products.find((item) => item.slug === slug);
+  const [product, setProduct] = useState(null);
+  const [related, setRelated] = useState([]);
+  useEffect(() => {
+    getProduct(slug).then(setProduct).catch(() => setProduct(undefined));
+  }, [slug]);
   useEffect(() => {
     if (product) document.title = `${product.name} | CleanWiper`;
   }, [product]);
@@ -22,7 +25,6 @@ export default function ProductDetailsB2B() {
         message="We couldn’t find that one. It may have been renamed or taken out of the catalogue."
       />
     );
-  const related = products.filter((item) => product.related?.includes(item.id));
   return (
     <section className="page product-detail-page container" style={tint(categoryColor(product.category))}>
       <div className="breadcrumbs">

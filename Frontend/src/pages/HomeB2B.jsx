@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   Package,
   BadgeIndianRupee,
@@ -33,7 +34,7 @@ const benefits = [
 ];
 // Staggers items that reveal together (see [data-reveal] in index.css).
 const stagger = (index) => ({ "--i": index });
-import { getProducts } from "../utils/storage";
+import { getProducts } from "../services/productApi";
 import { categories, faqs, industries } from "../utils/mockData";
 const industryIcons = [
   Factory,
@@ -47,7 +48,10 @@ const industryIcons = [
   ClipboardCheck,
 ];
 export default function HomeB2B() {
-  const products = getProducts();
+  const [products, setProducts] = useState([]);
+  useEffect(() => {
+    getProducts().then(setProducts).catch(() => setProducts([]));
+  }, []);
   const revealRef = useReveal();
   return (
     <div ref={revealRef}>

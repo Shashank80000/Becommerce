@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { FileText, Paperclip, X } from "lucide-react";
 import Input from "../common/Input";
 import Button from "../common/Button";
-import { getProducts } from "../../utils/storage";
+import { getProducts } from "../../services/productApi";
 import { submitQuote } from "../../services/quoteApi";
 import { business } from "../../utils/siteContent";
 
@@ -38,10 +38,11 @@ const businessTypes = [
 
 export default function QuoteForm({ bulk = false }) {
   const [params] = useSearchParams();
-  const products = getProducts();
-  const preselected = products.find(
-    (item) => item.slug === params.get("product"),
-  );
+  const [products, setProducts] = useState([]);
+  useEffect(() => {
+    getProducts().then(setProducts).catch(() => setProducts([]));
+  }, []);
+  const preselected = products.find((item) => item.slug === params.get("product"));
   const industry = params.get("industry");
   const [form, setForm] = useState({
     ...initial,

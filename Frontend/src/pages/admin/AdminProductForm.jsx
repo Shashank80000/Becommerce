@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Input from "../../components/common/Input";
-import { getProducts } from "../../utils/storage";
 import { saveProduct } from "../../services/productApi";
-import { uploadProductImage } from "../../services/adminApi";
+import {
+  getAdminCategories,
+  getAdminProducts,
+  getAdminToken,
+  uploadProductImage,
+} from "../../services/adminApi";
 const blank = {
   name: "",
-  category: "Floor Cleaner",
+  category: "",
   description: "",
   application: "Factory",
   sizes: "5L, 20L",
@@ -29,21 +33,34 @@ function dataUrlToFile(dataUrl, name = "product-image") {
 export default function AdminProductForm() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const existing = getProducts().find((item) => item.id === Number(id));
-  const [form, setForm] = useState(
-    existing
-      ? {
-          ...existing,
-          sizes: existing.sizes.join(", "),
-          features: existing.features.join("\n"),
-          specifications: existing.specifications.join("\n"),
-        }
-      : blank,
-  );
+  const [existing, setExisting] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [form, setForm] = useState(blank);
   const [imageError, setImageError] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(form.image);
   const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    Promise.all([getAdminCategories(), id ? getAdminProducts() : Promise.resolve([])])
+      .then(([loadedCategories, loadedProducts]) => {
+        setCategories(loadedCategories.filter((category) => category.isActive));
+        const found = loadedProducts.find((product) => product._id === id);
+        if (!found) return;
+        setExisting(found);
+        const image = found.images?.[0]?.url || "";
+        setForm({
+          ...found,
+          category: found.category?._id || found.category,
+          application: found.applications?.join(", ") || "",
+          sizes: found.packSizes?.join(", ") || "",
+          features: (found.features || []).join("\n"),
+          specifications: Object.values(found.specifications || {}).join("\n"),
+          image,
+        });
+        setImagePreview(image);
+      })
+      .catch((loadError) => setImageError(loadError.message));
+  }, [id]);
   const update = (key, value) => setForm({ ...form, [key]: value });
   const selectImage = (event) => {
     const file = event.target.files?.[0];
@@ -81,16 +98,18 @@ export default function AdminProductForm() {
       const image = imageFile
         ? (await uploadProductImage(imageFile)).url
         : form.image;
-      saveProduct({
+      await saveProduct({
         ...form,
-        image,
-        id: existing?.id,
-        sizes: form.sizes.split(",").map((item) => item.trim()),
-        applications: form.application.split(",").map((item) => item.trim()),
+        images: image ? [{ url: image }] : [],
+        category: form.category,
+        packSizes: form.sizes.split(",").map((item) => item.trim()).filter(Boolean),
+        applications: form.application.split(",").map((item) => item.trim()).filter(Boolean),
+        id: existing?._id,
         features: form.features.split("\n").filter(Boolean),
-        specifications: form.specifications.split("\n").filter(Boolean),
-        related: [],
-      });
+        specifications: Object.fromEntries(
+          form.specifications.split("\n").filter(Boolean).map((item, index) => [`item${index + 1}`, item]),
+        ),
+      }, getAdminToken());
       navigate("/admin/products");
     } catch (error) {
       setImageError(error.message);
@@ -120,21 +139,8 @@ export default function AdminProductForm() {
               value={form.category}
               onChange={(e) => update("category", e.target.value)}
             >
-              {[
-                "Floor Cleaner",
-                "Toilet Cleaner",
-                "Glass Cleaner",
-                "Disinfectant",
-                "Degreaser",
-                "Surface Cleaner",
-                "Laundry",
-                "Kitchen",
-                "Hygiene",
-                "Cleaning Tools",
-                "Garbage Bags",
-                "Industrial Chemicals",
-              ].map((item) => (
-                <option key={item}>{item}</option>
+              {categories.map((item) => (
+                <option key={item._id} value={item._id}>{item.name}</option>
               ))}
             </select>
           </label>

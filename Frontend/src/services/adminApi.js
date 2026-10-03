@@ -68,6 +68,18 @@ export async function uploadProductImage(file) {
   return data.data;
 }
 
+export async function getAdminProducts() {
+  return (await adminRequest("/products")).data;
+}
+
+export async function getAdminCategories() {
+  return (await adminRequest("/categories")).data;
+}
+
+export async function deleteAdminProduct(id) {
+  return adminRequest(`/products/${id}`, { method: "DELETE" });
+}
+
 export const getDashboard = () => adminRequest("/dashboard");
 
 export const getQuotes = (params = {}) => {

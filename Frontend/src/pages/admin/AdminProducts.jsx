@@ -1,11 +1,24 @@
 import { Link } from "react-router-dom";
 import { Pencil, Trash2, ExternalLink } from "lucide-react";
-import { useState } from "react";
-import { getProducts, removeProduct } from "../../utils/storage";
+import { useEffect, useState } from "react";
+import {
+  deleteAdminProduct,
+  getAdminProducts,
+} from "../../services/adminApi";
+import { normalizeProduct } from "../../services/productApi";
 export default function AdminProducts() {
-  const [products, setProducts] = useState(getProducts());
+  const [products, setProducts] = useState([]);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    getAdminProducts()
+      .then((items) => setProducts(items.map(normalizeProduct)))
+      .catch((loadError) => setError(loadError.message));
+  }, []);
   const del = (id) => {
-    if (window.confirm("Delete this product?")) setProducts(removeProduct(id));
+    if (!window.confirm("Delete this product?")) return;
+    deleteAdminProduct(id)
+      .then(() => setProducts((current) => current.filter((item) => item.id !== id)))
+      .catch((deleteError) => setError(deleteError.message));
   };
   return (
     <div className="admin-page">
@@ -13,6 +26,7 @@ export default function AdminProducts() {
         <div>
           <p className="eyebrow">Catalogue management</p>
           <h1>Products</h1>
+          {error && <p className="field-error">{error}</p>}
         </div>
         <Link className="button button-dark" to="/admin/products/add">
           Add Product +
