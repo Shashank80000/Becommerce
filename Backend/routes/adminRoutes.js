@@ -1,6 +1,11 @@
 import { Router } from "express";
 import { requireAdmin } from "../middleware/adminMiddleware.js";
-import { dashboard, loginAdmin } from "../controllers/adminController.js";
+import {
+  dashboard,
+  loginAdmin,
+  uploadAdminProductImage,
+} from "../controllers/adminController.js";
+import { productImageUpload } from "../middleware/uploadMiddleware.js";
 import {
   adminListProducts,
   createProduct,
@@ -30,6 +35,11 @@ const router = Router();
 router.post("/login", loginAdmin);
 router.use(requireAdmin);
 router.get("/dashboard", dashboard);
+router.post(
+  "/uploads/product-image",
+  productImageUpload,
+  uploadAdminProductImage,
+);
 router.route("/products").get(adminListProducts).post(createProduct);
 router.route("/products/:id").put(updateProduct).delete(deactivateProduct);
 router.route("/categories").get(adminListCategories).post(createCategory);

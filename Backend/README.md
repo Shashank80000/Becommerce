@@ -24,6 +24,7 @@ MongoDB must be running at `MONGO_URI` before seeding or starting the server. Th
 - `CLIENT_URL`: comma-separated allowed frontend origins. This is required when `NODE_ENV=production`, for example `https://www.example.com,https://example.com`. Use origins only: do not include `/api` or a trailing slash.
 - `ADMIN_API_KEY`: admin login secret; it is exchanged for a JWT and never sent on admin API requests
 - `JWT_SECRET`: long random secret used to sign admin JWTs
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`: Cloudinary server credentials for product images
 - `NODE_ENV`: `development` or `production`
 
 ## Public endpoints
@@ -84,6 +85,7 @@ curl http://localhost:5000/api/admin/dashboard \
 ```
 
 - `GET /api/admin/dashboard`
+- `POST /api/admin/uploads/product-image` uploads an image to Cloudinary (JWT required; use multipart field `image`)
 - `GET|POST /api/admin/products`
 - `PUT|DELETE /api/admin/products/:id`
 - `GET|POST /api/admin/categories`
@@ -109,6 +111,9 @@ MONGO_URI=mongodb+srv://USERNAME:PASSWORD@CLUSTER.mongodb.net/cleaning_products?
 CLIENT_URL=https://www.example.com,https://example.com
 ADMIN_API_KEY=a-long-random-secret
 JWT_SECRET=a-different-long-random-secret
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 Start command: `npm start`.

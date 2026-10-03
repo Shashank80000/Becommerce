@@ -13,7 +13,7 @@ export default function ProductDetailsB2B() {
   const products = getProducts();
   const product = products.find((item) => item.slug === slug);
   useEffect(() => {
-    if (product) document.title = `${product.name} | B.Ecommerce`;
+    if (product) document.title = `${product.name} | CleanWiper`;
   }, [product]);
   if (!product)
     return (

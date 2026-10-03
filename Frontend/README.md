@@ -1,4 +1,4 @@
-# B.Ecommerce frontend deployment
+# CleanWiper frontend deployment
 
 ## Local development
 

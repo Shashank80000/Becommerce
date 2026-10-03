@@ -10,7 +10,7 @@ export default function Navbar() {
       <nav className="nav container">
         <Link to="/" className="brand" onClick={() => setOpen(false)}>
           <span className="brand-mark">B</span>
-          <span>B.Ecommerce</span>
+          <span>CleanWiper</span>
         </Link>
         <div className="nav-links">
           <NavLink to="/products">Products</NavLink>

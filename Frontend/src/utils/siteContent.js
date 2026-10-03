@@ -7,7 +7,7 @@
 // placeholders so you can see where they will appear.
 
 export const business = {
-  name: "B.Ecommerce",
+  name: "CleanWiper",
   // Shown in the footer and on the contact page. Leave "" to hide.
   phone: "+91 85950 88789",
   phoneHref: "+918595088789", // digits only, for tel: links

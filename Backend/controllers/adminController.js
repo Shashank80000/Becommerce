@@ -3,6 +3,7 @@ import Product from "../models/Product.js";
 import Quote from "../models/Quote.js";
 import Category from "../models/Category.js";
 import Solution from "../models/Solution.js";
+import { uploadProductImage } from "../utils/cloudinary.js";
 
 export function loginAdmin(req, res) {
   const providedKey = req.body?.apiKey;
@@ -22,6 +23,23 @@ export function loginAdmin(req, res) {
     expiresIn: "2h",
   });
   return res.json({ success: true, token, expiresIn: "2h" });
+}
+
+export async function uploadAdminProductImage(req, res, next) {
+  try {
+    if (!req.file)
+      return res.status(400).json({
+        success: false,
+        message: "An image file is required",
+      });
+    const result = await uploadProductImage(req.file.buffer);
+    res.status(201).json({
+      success: true,
+      data: { url: result.secure_url, publicId: result.public_id },
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
 export async function dashboard(req, res, next) {

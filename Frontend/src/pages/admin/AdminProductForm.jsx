@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Input from "../../components/common/Input";
 import { getProducts } from "../../utils/storage";
 import { saveProduct } from "../../services/productApi";
+import { uploadProductImage } from "../../services/adminApi";
 const blank = {
   name: "",
   category: "Floor Cleaner",
@@ -15,6 +16,16 @@ const blank = {
   status: "Active",
 };
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+function dataUrlToFile(dataUrl, name = "product-image") {
+  const [header, base64] = dataUrl.split(",");
+  const mime = header.match(/data:(.*?);base64/)?.[1] || "image/jpeg";
+  const bytes = Uint8Array.from(atob(base64), (character) =>
+    character.charCodeAt(0),
+  );
+  return new File([bytes], name, { type: mime });
+}
+
 export default function AdminProductForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -30,6 +41,9 @@ export default function AdminProductForm() {
       : blank,
   );
   const [imageError, setImageError] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(form.image);
+  const [saving, setSaving] = useState(false);
   const update = (key, value) => setForm({ ...form, [key]: value });
   const selectImage = (event) => {
     const file = event.target.files?.[0];
@@ -44,30 +58,45 @@ export default function AdminProductForm() {
       event.target.value = "";
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result !== "string") {
-        setImageError("The image could not be read. Please try again.");
-        return;
-      }
-      setImageError("");
-      update("image", reader.result);
-    };
-    reader.onerror = () => setImageError("The image could not be read. Please try again.");
-    reader.readAsDataURL(file);
+    setImageError("");
+    setSelectedImage(file);
+    setImagePreview(URL.createObjectURL(file));
   };
-  const save = (event) => {
+  useEffect(
+    () => () => {
+      if (imagePreview.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
+    },
+    [imagePreview],
+  );
+  const save = async (event) => {
     event.preventDefault();
-    saveProduct({
-      ...form,
-      id: existing?.id,
-      sizes: form.sizes.split(",").map((item) => item.trim()),
-      applications: form.application.split(",").map((item) => item.trim()),
-      features: form.features.split("\n").filter(Boolean),
-      specifications: form.specifications.split("\n").filter(Boolean),
-      related: [],
-    });
-    navigate("/admin/products");
+    setSaving(true);
+    setImageError("");
+    try {
+      const imageFile =
+        selectedImage ||
+        (form.image.startsWith("data:")
+          ? dataUrlToFile(form.image)
+          : null);
+      const image = imageFile
+        ? (await uploadProductImage(imageFile)).url
+        : form.image;
+      saveProduct({
+        ...form,
+        image,
+        id: existing?.id,
+        sizes: form.sizes.split(",").map((item) => item.trim()),
+        applications: form.application.split(",").map((item) => item.trim()),
+        features: form.features.split("\n").filter(Boolean),
+        specifications: form.specifications.split("\n").filter(Boolean),
+        related: [],
+      });
+      navigate("/admin/products");
+    } catch (error) {
+      setImageError(error.message);
+    } finally {
+      setSaving(false);
+    }
   };
   return (
     <div className="admin-page">
@@ -178,16 +207,20 @@ export default function AdminProductForm() {
           </div>
           <div className="product-image-preview">
             <span>Preview</span>
-            <img src={form.image} alt="Product preview" />
+            <img src={imagePreview} alt="Product preview" />
           </div>
         </div>
         <Input
           label="Image URL (optional)"
           value={form.image.startsWith("data:") ? "" : form.image}
-          onChange={(e) => update("image", e.target.value)}
+          onChange={(e) => {
+            setSelectedImage(null);
+            setImagePreview(e.target.value);
+            update("image", e.target.value);
+          }}
         />
-        <button className="button button-dark" type="submit">
-          Save Product ↗
+        <button className="button button-dark" type="submit" disabled={saving}>
+          {saving ? "Uploading..." : "Save Product ↗"}
         </button>
       </form>
     </div>

@@ -58,6 +58,16 @@ async function adminRequest(path, options) {
   return data;
 }
 
+export async function uploadProductImage(file) {
+  const formData = new FormData();
+  formData.append("image", file);
+  const data = await adminRequest("/uploads/product-image", {
+    method: "POST",
+    body: formData,
+  });
+  return data.data;
+}
+
 export const getDashboard = () => adminRequest("/dashboard");
 
 export const getQuotes = (params = {}) => {

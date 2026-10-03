@@ -22,7 +22,7 @@ export default function SolutionDetailsB2B() {
     (item) => item.slug === slug || item.slug === solutionAliases[slug],
   );
   useEffect(() => {
-    if (solution) document.title = `${solution.title} | B.Ecommerce`;
+    if (solution) document.title = `${solution.title} | CleanWiper`;
   }, [solution]);
   if (!solution)
     return (

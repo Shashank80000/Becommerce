@@ -16,7 +16,7 @@ export default function AdminSidebar({ onLogout }) {
     <aside className="admin-sidebar">
       <Link to="/admin" className="brand">
         <span className="brand-mark">B</span>
-        <span>B.Ecommerce</span>
+        <span>CleanWiper</span>
       </Link>
       <p className="admin-label">Operations</p>
       <NavLink end to="/admin">

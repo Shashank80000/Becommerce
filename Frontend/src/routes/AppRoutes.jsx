@@ -25,7 +25,7 @@ const AdminQuotes = lazy(() => import("../pages/admin/AdminQuotes"));
 const AdminSidebar = lazy(() => import("../components/admin/AdminSidebar"));
 const AdminLogin = lazy(() => import("../components/admin/AdminLogin"));
 
-const SITE = "B.Ecommerce";
+const SITE = "CleanWiper";
 const titles = [
   [/^\/$/, "Industrial sourcing, made clear"],
   [/^\/products/, "Products"],
