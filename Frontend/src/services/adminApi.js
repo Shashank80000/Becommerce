@@ -76,6 +76,15 @@ export async function getAdminCategories() {
   return (await adminRequest("/categories")).data;
 }
 
+export async function createAdminCategory(name) {
+  return (
+    await adminRequest("/categories", {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    })
+  ).data;
+}
+
 export async function deleteAdminProduct(id) {
   return adminRequest(`/products/${id}`, { method: "DELETE" });
 }

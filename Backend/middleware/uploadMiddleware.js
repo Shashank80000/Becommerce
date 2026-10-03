@@ -1,7 +1,7 @@
 import multer from "multer";
 
 export const MAX_PDF_BYTES = 10 * 1024 * 1024;
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+export const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
 const pdfUpload = multer({
   storage: multer.memoryStorage(),
@@ -22,7 +22,12 @@ const imageUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_IMAGE_BYTES, files: 1, fields: 10 },
   fileFilter(req, file, callback) {
-    if (!file.mimetype.startsWith("image/")) {
+    const hasImageMime = file.mimetype && file.mimetype.startsWith("image/");
+    const hasImageExtension = /\.(jpe?g|png|gif|webp|bmp|svg|avif|heic|heif)$/i.test(
+      file.originalname,
+    );
+
+    if (!hasImageMime && !hasImageExtension) {
       const error = new Error("Only image files can be uploaded");
       error.statusCode = 400;
       return callback(error);

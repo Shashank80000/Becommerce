@@ -6,6 +6,7 @@ import {
   getAdminCategories,
   getAdminProducts,
   getAdminToken,
+  createAdminCategory,
   uploadProductImage,
 } from "../../services/adminApi";
 const blank = {
@@ -19,7 +20,7 @@ const blank = {
   image: "https://placehold.co/700x520/d7e5df/17322c?text=Cleaning+Product",
   status: "Active",
 };
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
 function dataUrlToFile(dataUrl, name = "product-image") {
   const [header, base64] = dataUrl.split(",");
@@ -39,6 +40,9 @@ export default function AdminProductForm() {
   const [imageError, setImageError] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(form.image);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [categoryError, setCategoryError] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
   const [saving, setSaving] = useState(false);
   useEffect(() => {
     Promise.all([getAdminCategories(), id ? getAdminProducts() : Promise.resolve([])])
@@ -62,16 +66,46 @@ export default function AdminProductForm() {
       .catch((loadError) => setImageError(loadError.message));
   }, [id]);
   const update = (key, value) => setForm({ ...form, [key]: value });
+  const createCategory = async (event) => {
+    event.preventDefault();
+    const name = newCategoryName.trim();
+    if (!name) {
+      setCategoryError("Enter a category name.");
+      return;
+    }
+
+    setCreatingCategory(true);
+    setCategoryError("");
+    try {
+      const category = await createAdminCategory(name);
+      setCategories((current) =>
+        [...current, category].sort((left, right) =>
+          left.name.localeCompare(right.name),
+        ),
+      );
+      update("category", category._id);
+      setNewCategoryName("");
+    } catch (error) {
+      setCategoryError(error.message);
+    } finally {
+      setCreatingCategory(false);
+    }
+  };
   const selectImage = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
+
+    const hasImageType =
+      file.type?.startsWith("image/") ||
+      /\.(jpe?g|png|gif|webp|bmp|svg|avif|heic|heif)$/i.test(file.name);
+
+    if (!hasImageType) {
       setImageError("Please choose an image file.");
       event.target.value = "";
       return;
     }
     if (file.size > MAX_IMAGE_BYTES) {
-      setImageError("Image must be 5 MB or smaller.");
+      setImageError("Image must be 20 MB or smaller.");
       event.target.value = "";
       return;
     }
@@ -133,17 +167,39 @@ export default function AdminProductForm() {
             onChange={(e) => update("name", e.target.value)}
             required
           />
-          <label className="field">
-            <span>Category</span>
-            <select
-              value={form.category}
-              onChange={(e) => update("category", e.target.value)}
-            >
-              {categories.map((item) => (
-                <option key={item._id} value={item._id}>{item.name}</option>
-              ))}
-            </select>
-          </label>
+          <div>
+            <label className="field">
+              <span>Category</span>
+              <select
+                value={form.category}
+                onChange={(e) => update("category", e.target.value)}
+                required
+              >
+                <option value="">Select a category</option>
+                {categories.map((item) => (
+                  <option key={item._id} value={item._id}>{item.name}</option>
+                ))}
+              </select>
+            </label>
+            <div className="form-inline">
+              <input
+                type="text"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="New category name"
+                aria-label="New category name"
+              />
+              <button
+                className="button button-light"
+                type="button"
+                onClick={createCategory}
+                disabled={creatingCategory}
+              >
+                {creatingCategory ? "Adding..." : "Add category"}
+              </button>
+            </div>
+            {categoryError && <p className="field-error">{categoryError}</p>}
+          </div>
         </div>
         <Input
           label="Description"
@@ -204,11 +260,11 @@ export default function AdminProductForm() {
               <span>Upload product image</span>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg,.avif"
                 onChange={selectImage}
               />
             </label>
-            <p className="form-help">JPG, PNG, WEBP, or GIF up to 5 MB.</p>
+            <p className="form-help">JPG, PNG, WEBP, or GIF up to 20 MB.</p>
             {imageError && <p className="field-error">{imageError}</p>}
           </div>
           <div className="product-image-preview">

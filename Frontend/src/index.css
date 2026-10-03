@@ -1766,6 +1766,19 @@ body {
   color: var(--muted);
   font-size: 11px;
 }
+.form-inline {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.form-inline input {
+  min-width: 0;
+  flex: 1;
+}
+.form-inline .button {
+  margin-top: 0;
+  white-space: nowrap;
+}
 .product-image-preview {
   min-height: 150px;
   border: 1px solid var(--line);
