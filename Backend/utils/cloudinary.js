@@ -31,7 +31,13 @@ export function uploadProductImage(buffer) {
         folder: "cleanwiper/products",
         resource_type: "image",
         transformation: [
-          { width: 1400, height: 1050, crop: "limit", quality: "auto" },
+          {
+            width: 1400,
+            height: 1050,
+            crop: "fill",
+            gravity: "auto",
+            quality: "auto",
+          },
           { fetch_format: "auto" },
         ],
       },
